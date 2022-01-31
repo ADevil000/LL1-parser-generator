@@ -1,0 +1,32 @@
+grammar Calculator;
+
+lexer {
+	PLUS : "\\+";
+	MINUS : "-";
+	MUL : "\\*";
+	DIV : "/";
+	WS : "[ \t\r\n]+" -> ignore;
+	NUMBER : "[1-9][0-9]*";
+	LBRACKET : "\\(";
+	RBRACKET : "\\)";
+}
+
+
+parser {
+	start() [int=val] : e() { $val = e0.val; };
+
+	e() [int=val] : t() a(t0.val) {$val = a1.val;};
+
+	a(int=acc) [int=val] : PLUS t() {acc = acc + t1.val;} a(acc) {$val = a2.val;}
+	| MINUS t() {acc = acc - t1.val;} a(acc) {$val = a2.val;}
+	| EPS {$val = acc;};
+
+	t() [int=val] : v() f(v0.val) {$val = f1.val;};
+
+	f(int=acc) [int=val] : MUL v() {acc = acc * v1.val;} f(acc) {$val = f2.val;}
+	| DIV v() {acc = acc / v1.val;} f(acc) {$val = f2.val;}
+	| EPS {$val = acc;};
+
+	v() [int=val] : NUMBER {$val = Integer.parseInt(NUMBER0.value);}
+	| LBRACKET e() RBRACKET {$val = e1.val;};
+}
